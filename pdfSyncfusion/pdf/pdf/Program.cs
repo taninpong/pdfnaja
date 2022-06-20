@@ -355,8 +355,8 @@ namespace pdf
             //StreamReader reader = new StreamReader(@"input.txt", Encoding.ASCII);
             //string text = reader.ReadToEnd();
             //reader.Close();
-            Stream fileStream = new FileStream("F:\\pilot\\pdfSyncfusion\\pdf\\pdf\\bin\\Debug\\net5.0\\Input.xml", FileMode.Open, FileAccess.Read);
-            PdfAttachment attachment = new PdfAttachment("F:\\pilot\\pdfSyncfusion\\pdf\\pdf\\bin\\Debug\\net5.0\\Input.xml", fileStream);
+            Stream fileStream = new FileStream("Input.xml", FileMode.Open, FileAccess.Read);
+            PdfAttachment attachment = new PdfAttachment("Input.xml", fileStream);
             attachment.Relationship = PdfAttachmentRelationship.Alternative;
             attachment.ModificationDate = DateTime.Now;
             attachment.CreationDate = DateTime.Now;
@@ -452,7 +452,7 @@ It is a long established fact that a reader will be distracted by the readable c
             format.EnableNewLineIndent = true;
             format.LineLimit = true;
             format.ParagraphIndent = 1;
-            //format.WordSpacing =10;
+            //format.WordSpacing = -1;
             format.MeasureTrailingSpaces = true;
             //Img
             FileStream imageStream = new FileStream("icon.png", FileMode.Open, FileAccess.Read);
