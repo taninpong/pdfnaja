@@ -17,6 +17,7 @@ using Syncfusion.Pdf.Security;
 using System.ComponentModel;
 using System.Reflection;
 using System.Linq;
+using System.Xml;
 
 namespace pdf
 {
@@ -26,8 +27,9 @@ namespace pdf
         {
             //GenSynPDFA3();
             //MultipageTable();
-            LastBill();
+            //LastBill();
             //PDFSautin(fs);
+            CreaetXML();
             Console.WriteLine("Hello World!");
         }
 
@@ -948,17 +950,23 @@ It is a long established fact that a reader will be distracted by the readable c
             format.ParagraphIndent = 1;
             format.MeasureTrailingSpaces = true;
             //Img
-            FileStream imageStream = new FileStream("icon.png", FileMode.Open, FileAccess.Read);
-            PdfBitmap image = new PdfBitmap(imageStream);
-            graphics.DrawImage(image, new PointF(200, 0), new SizeF(50, 50));
+            //FileStream imageStream = new FileStream("icon.png", FileMode.Open, FileAccess.Read);
+            //PdfBitmap image = new PdfBitmap(imageStream);
+            //graphics.DrawImage(image, new PointF(200, 0), new SizeF(50, 50));
             ////Signature
-            //FileStream certificateStream = new FileStream("certificatedemo.pfx", FileMode.Open, FileAccess.Read);
-            //PdfCertificate pdfCert = new PdfCertificate(certificateStream, "P@ssw0rd1234");
-            //PdfSignature signature = new PdfSignature(document, page, pdfCert, "Signature");
+            FileStream certificateStream = new FileStream("polocert.pfx", FileMode.Open, FileAccess.Read);
+            PdfCertificate pdfCert = new PdfCertificate(certificateStream, "P@ssw0rd");
+            PdfSignature signature = new PdfSignature(document, page, pdfCert, "Polo");
+            signature.SignedName = "บริษัท มานะ2018 จำกัด";
+            signature.ContactInfo = "mana2018@gmail.com";
+            signature.LocationInfo = "Digitally Signed By บริษัท มานะ 2018 จำกัด";
+            signature.Reason = "เอกสารฉบับนี้ได้จัดทำและส่งข้อมูลให้แก่กรมสรรพากรด้วยวิธีการอิเล็กทรอนิกส์";
             ////Sets an image for signature field 
 
+            //signature.TimeStampServer = new TimeStampServer(new Uri(""), "Username", "Password");
             FileStream signatureimageStream = new FileStream("icon.png", FileMode.Open, FileAccess.Read);
             PdfBitmap signatureImage = new PdfBitmap(signatureimageStream);
+            //signature.Bounds = new RectangleF(new PointF(0, 0), signatureImage.PhysicalDimension);
 
             //table
             PdfGrid pdfGrid = new PdfGrid();
@@ -1160,8 +1168,19 @@ It is a long established fact that a reader will be distracted by the readable c
             compositeField.Bounds = footer.Bounds;
             //graphics.DrawImage(signatureImage, 0, 0);
             footer.Background = true;
-            footer.Graphics.DrawString("Digitally Signed By บริษัท มานะ 2018 จำกัด", font10, PdfBrushes.Black, new PointF(0, 0));
-            footer.Graphics.DrawString("เอกสารฉบับนี้ได้จัดทำและส่งข้อมูลให้แก่กรมสรรพากรด้วยวิธีการอิเล็กทรอนิกส์", font10, PdfBrushes.Black, new PointF(0, 20));
+
+            //footer.Graphics.DrawString("Digitally Signed By บริษัท มานะ 2018 จำกัด", font10, PdfBrushes.Black, new PointF(0, 0));
+            //footer.Graphics.DrawString("เอกสารฉบับนี้ได้จัดทำและส่งข้อมูลให้แก่กรมสรรพากรด้วยวิธีการอิเล็กทรอนิกส์", font10, PdfBrushes.Black, new PointF(0, 20));
+            footer.Graphics.DrawString(signature.LocationInfo, font10, PdfBrushes.Black, new PointF(0, 0));
+            footer.Graphics.DrawString(signature.Reason, font10, PdfBrushes.Black, new PointF(0, 20));
+            //footer.Graphics.DrawString(signatureImage, font10, PdfBrushes.Black, new PointF(0, 20));
+            //signature.Bounds = new RectangleF(0, 0, 50, 50);
+            signature.Bounds = new RectangleF(new PointF(page.GetClientSize().Width / 2 - 20, 0), new SizeF(50, 50));
+            //signature.Bounds = new RectangleF(new PointF(0, 0), signatureImage.PhysicalDimension);
+            signature.Appearance.Normal.Graphics.DrawImage(signatureImage, 0, 0, 50, 50);
+            var assd = footer;
+            var eee = assd.Bounds.Bottom + 20;
+            //footer.Graphics.DrawImage(signatureImage, signature.Bounds);
             compositeField.Draw(footer.Graphics, new PointF(400, 20));
             document.Template.Bottom = footer;
             //Draw the second paragraph from the first paragraph’s end position.
@@ -1187,6 +1206,38 @@ It is a long established fact that a reader will be distracted by the readable c
             }
         }
 
+        public static void CreaetXML()
+        {
+            string Header = System.IO.File.ReadAllText(@"headxml.txt");
+            //var xe = text.Contains("BusinessName");
+            Header = Header.Replace("BusinessName", "MANA2018");
+            System.Console.WriteLine("Contents of WriteText.txt = {0}", Header);
+
+
+            //List Item
+            var resultItem = "";
+            for (int i = 1; i <= 3; i++)
+            {
+                string listItem = System.IO.File.ReadAllText(@"itemxml.txt");
+                listItem = listItem.Replace("NO", i.ToString());
+                listItem = listItem.Replace("PR00001", "PR00001 : " + i.ToString());
+                resultItem += listItem;
+
+                Console.WriteLine(resultItem);
+            }
+
+            var resultxml = Header + resultItem;
+            string path = @"xxs.xml";
+            // Create the file, or overwrite if the file exists.
+            using (FileStream fs = File.Create(path, 1024))
+            {
+                byte[] info = new UTF8Encoding(true).GetBytes(resultItem);
+                // Add some information to the file.
+                fs.Write(info, 0, info.Length);
+            }
+
+        }
+
     }
     public class Customer
     {
@@ -1200,6 +1251,113 @@ It is a long established fact that a reader will be distracted by the readable c
         public double Price { get; set; }
         [DisplayName("ราคาภาษีมูลค่าเพิ่ม")]
         public double Sum { get; set; }
+    }
+
+
+    public class DataXML
+    {
+        public int MyProperty { get; set; }
+        public TradeParty Seller { get; set; }
+        public TradeParty Buyer { get; set; }
+    }
+
+    public class ExchangedDocument
+    {
+        public string _id { get; set; }
+        public string Name { get; set; }
+        public string TypeCode { get; set; }
+        public string IssueDateTime { get; set; }
+        public string PurposeCode { get; set; }
+        public string CreationDateTime { get; set; }
+        public Note Note { get; set; }
+    }
+
+    public class Note
+    {
+        public string Subject { get; set; }
+        public string Content { get; set; }
+    }
+    public class TradeParty
+    {
+        public string Name { get; set; }
+        public string TaxId { get; set; }
+        public Address Address { get; set; }
+        public AdditionalReferencedDocument AdditionalReferencedDocument { get; set; }
+        public HeaderTradeDelivery HeaderTradeDelivery { get; set; }
+        // สรุปค่าใช้จ่าย
+        public HeaderTradeSettlement HeaderTradeSettlement { get; set; }
+        //List Item
+        public List<Item> ListItem { get; set; }
+
+    }
+    public class AdditionalReferencedDocument
+    {
+        public string IssueDateTime { get; set; }
+        public string ReferenceTypeCode { get; set; }
+    }
+    public class Address
+    {
+        public string PostcodeCode { get; set; }
+        public string LineThree { get; set; }
+        public string StreetName { get; set; }
+        public string CityName { get; set; }
+        public string CitySubDivisionName { get; set; }
+        public string CountryID { get; set; }
+        public string CountrySubDivisionID { get; set; }
+        public string BuildingNumber { get; set; }
+    }
+    public class HeaderTradeDelivery
+    {
+        public Address ShipToTradeParty { get; set; }
+        public Address ShipFromTradeParty { get; set; }
+    }
+    public class HeaderTradeSettlement
+    {
+        public string InvoiceCurrencyCode { get; set; }
+        public string TypeCode { get; set; }
+        public string VatRate { get; set; }
+        public string BasisAmount { get; set; }
+        public string VateBasisAmount { get; set; }
+        //Allowance ส่วนลด
+        public List<SpecifiedTradeAllowanceCharge> SpecifiedTradeAllowanceCharge { get; set; }
+        //MonetarySummation
+
+        public string LineTotalAmount { get; set; }
+        public string AllowanceTotalAmount { get; set; }
+        public string TaxBasisTotalAmount { get; set; }
+        public string TaxTotalAmount { get; set; }
+        public string GrandTotalAmount { get; set; }
+    }
+
+    public class SpecifiedTradeAllowanceCharge
+    {
+        public bool ChargeIndicator { get; set; }
+        public string ActualAmount { get; set; }
+        public string ReasonCode { get; set; }
+        public string Reason { get; set; }
+    }
+
+    public class Item
+    {
+        public string Number { get; set; }
+        public string ProductId { get; set; }
+        public string ProductName { get; set; }
+        public string ProductPrice { get; set; }
+        public string ProductAmount { get; set; }
+        public string TypeCode { get; set; }
+        public string VateRate { get; set; }
+        public string TotalAmount { get; set; }
+        public string VateAmount { get; set; }
+        //ส่วนลด Discount
+        public bool ChargeIndicator { get; set; }
+        public string Discount { get; set; }
+        public string ReasonCode { get; set; }
+        public string Reason { get; set; }
+        //SummationItem
+        public string TaxTotalAmount { get; set; }
+        public string NetLineTotalAmount { get; set; }
+        public string NetIncludingTaxesLineTotalAmount { get; set; }
+
     }
 
 }
