@@ -1259,6 +1259,11 @@ It is a long established fact that a reader will be distracted by the readable c
         public int MyProperty { get; set; }
         public TradeParty Seller { get; set; }
         public TradeParty Buyer { get; set; }
+        public HeaderTradeDelivery HeaderTradeDelivery { get; set; }
+        // สรุปค่าใช้จ่าย
+        public HeaderTradeSettlement HeaderTradeSettlement { get; set; }
+        //List Item
+        public List<Item> ListItem { get; set; }
     }
 
     public class ExchangedDocument
@@ -1283,11 +1288,7 @@ It is a long established fact that a reader will be distracted by the readable c
         public string TaxId { get; set; }
         public Address Address { get; set; }
         public AdditionalReferencedDocument AdditionalReferencedDocument { get; set; }
-        public HeaderTradeDelivery HeaderTradeDelivery { get; set; }
-        // สรุปค่าใช้จ่าย
-        public HeaderTradeSettlement HeaderTradeSettlement { get; set; }
-        //List Item
-        public List<Item> ListItem { get; set; }
+      
 
     }
     public class AdditionalReferencedDocument
