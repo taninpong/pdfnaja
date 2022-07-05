@@ -27,9 +27,9 @@ namespace pdf
         {
             //GenSynPDFA3();
             //MultipageTable();
-            //LastBill();
-            //PDFSautin(fs);
-            CreaetXML();
+            //CreaetXML();
+            LastBill();
+            TimeStam();
             Console.WriteLine("Hello World!");
         }
 
@@ -887,7 +887,7 @@ It is a long established fact that a reader will be distracted by the readable c
             }
         }
 
-        public static void LastBill()
+        public async static void LastBill()
         {
             //Create a new PDF document.
             PdfDocument document = new PdfDocument(PdfConformanceLevel.Pdf_A3A);
@@ -899,8 +899,8 @@ It is a long established fact that a reader will be distracted by the readable c
             document.DocumentInformation.CreationDate = DateTime.Now;
             document.DocumentInformation.Creator = "มานะ2018";
 
-            Stream fileStream = new FileStream("Input.xml", FileMode.Open, FileAccess.Read);
-            PdfAttachment attachment = new PdfAttachment("Input.xml", fileStream);
+            Stream fileStream = new FileStream("input2.xml", FileMode.Open, FileAccess.Read);
+            PdfAttachment attachment = new PdfAttachment("input2.xml", fileStream);
             attachment.Relationship = PdfAttachmentRelationship.Alternative;
             attachment.ModificationDate = DateTime.Now;
             attachment.CreationDate = DateTime.Now;
@@ -957,13 +957,15 @@ It is a long established fact that a reader will be distracted by the readable c
             FileStream certificateStream = new FileStream("polocert.pfx", FileMode.Open, FileAccess.Read);
             PdfCertificate pdfCert = new PdfCertificate(certificateStream, "P@ssw0rd");
             PdfSignature signature = new PdfSignature(document, page, pdfCert, "Polo");
+            //signature.TimeStampServer = new TimeStampServer(new Uri("http://timestamp.apple.com/ts01"));
             signature.SignedName = "บริษัท มานะ2018 จำกัด";
             signature.ContactInfo = "mana2018@gmail.com";
             signature.LocationInfo = "Digitally Signed By บริษัท มานะ 2018 จำกัด";
             signature.Reason = "เอกสารฉบับนี้ได้จัดทำและส่งข้อมูลให้แก่กรมสรรพากรด้วยวิธีการอิเล็กทรอนิกส์";
             ////Sets an image for signature field 
 
-            //signature.TimeStampServer = new TimeStampServer(new Uri(""), "Username", "Password");
+            //signature.TimeStampServer = new TimeStampServer(new Uri("https://freetsa.org"), "Username", "Password");
+
             FileStream signatureimageStream = new FileStream("icon.png", FileMode.Open, FileAccess.Read);
             PdfBitmap signatureImage = new PdfBitmap(signatureimageStream);
             //signature.Bounds = new RectangleF(new PointF(0, 0), signatureImage.PhysicalDimension);
@@ -1208,7 +1210,7 @@ It is a long established fact that a reader will be distracted by the readable c
 
         public static void CreaetXML()
         {
-            string Header = System.IO.File.ReadAllText(@"headxml.txt");
+            string Header = System.IO.File.ReadAllText(@"headernewxml.txt");
             //var xe = text.Contains("BusinessName");
             Header = Header.Replace("BusinessName", "MANA2018");
             System.Console.WriteLine("Contents of WriteText.txt = {0}", Header);
@@ -1218,26 +1220,41 @@ It is a long established fact that a reader will be distracted by the readable c
             var resultItem = "";
             for (int i = 1; i <= 3; i++)
             {
-                string listItem = System.IO.File.ReadAllText(@"itemxml.txt");
-                listItem = listItem.Replace("NO", i.ToString());
+                string listItem = System.IO.File.ReadAllText(@"itemnewxml.txt");
+                listItem = listItem.Replace("ItemNo", i.ToString());
+                listItem = listItem.Replace("ItemcurrencyID", "THB");
                 listItem = listItem.Replace("PR00001", "PR00001 : " + i.ToString());
                 resultItem += listItem;
 
                 Console.WriteLine(resultItem);
             }
 
-            var resultxml = Header + resultItem;
+            var resultxml = Header + resultItem + "</rsm:SupplyChainTradeTransaction>\n</rsm:TaxInvoice_CrossIndustryInvoice>";
             string path = @"xxs.xml";
             // Create the file, or overwrite if the file exists.
-            using (FileStream fs = File.Create(path, 1024))
+            using (FileStream fs = File.Create(path))
             {
-                byte[] info = new UTF8Encoding(true).GetBytes(resultItem);
+                byte[] info = new UTF8Encoding(true).GetBytes(resultxml);
                 // Add some information to the file.
                 fs.Write(info, 0, info.Length);
             }
 
         }
 
+        public static void TimeStam()
+        {
+
+            var docStream = new FileStream("SampleLastBill.pdf", FileMode.Open, FileAccess.Read);
+            var loadedDocument = new PdfLoadedDocument(docStream);
+            var page = loadedDocument.Pages[0] as PdfLoadedPage;
+            var signature = new PdfSignature(page, "Signature");
+            signature.TimeStampServer = new TimeStampServer(new Uri("http://timestamp.apple.com/ts01"));
+            var stream = new MemoryStream();
+            loadedDocument.Save(stream);
+            loadedDocument.Close(true);
+            File.WriteAllBytes("SampleLastBillsdsds.pdf", stream.ToArray());
+
+        }
     }
     public class Customer
     {
@@ -1288,7 +1305,7 @@ It is a long established fact that a reader will be distracted by the readable c
         public string TaxId { get; set; }
         public Address Address { get; set; }
         public AdditionalReferencedDocument AdditionalReferencedDocument { get; set; }
-      
+
 
     }
     public class AdditionalReferencedDocument
@@ -1349,6 +1366,7 @@ It is a long established fact that a reader will be distracted by the readable c
         public string VateRate { get; set; }
         public string TotalAmount { get; set; }
         public string VateAmount { get; set; }
+        public string UnitCode { get; set; }
         //ส่วนลด Discount
         public bool ChargeIndicator { get; set; }
         public string Discount { get; set; }
